@@ -1,31 +1,31 @@
-import {Component} from 'react'
+import React from 'react'
+import Loader from 'react-loader-spinner'
 
+import 'react-loader-spinner/dist/loader/css/react-spinner-loader.css'
 import './index.css'
 
-class BlogItemDetails extends Component {
-  state = {blogData: {}}
+class BlogItemDetails extends React.Component {
+  state = {blogData: {}, isLoading: true}
 
   componentDidMount() {
-    this.renderBlogData()
+    this.getBlogItemData()
   }
 
-  renderBlogData = async () => {
+  getBlogItemData = async () => {
     const {match} = this.props
     const {params} = match
     const {id} = params
-    const rensonse = await fetch(`https://apis.ccbp.in/blogs/${id}`)
-    const data = await rensonse.json()
-    console.log(data)
+
+    const response = await fetch(`https://apis.ccbp.in/blogs/${id}`)
+    const data = await response.json()
     const updatedData = {
       title: data.title,
       imageUrl: data.image_url,
+      content: data.content,
       avatarUrl: data.avatar_url,
       author: data.author,
-      topic: data.topic,
-      content: data.content,
     }
-    console.log(updatedData)
-    this.setState({blogData: updatedData})
+    this.setState({blogData: updatedData, isLoading: false})
   }
 
   renderBlogItemDetails = () => {
@@ -33,7 +33,7 @@ class BlogItemDetails extends Component {
     const {title, imageUrl, content, avatarUrl, author} = blogData
     return (
       <div className="blog-info">
-        <h2 className="blog-details-title">{title}</h2>
+        <h1 className="blog-details-title">{title}</h1>
 
         <div className="author-details">
           <img className="author-pic" src={avatarUrl} alt={author} />
@@ -47,7 +47,19 @@ class BlogItemDetails extends Component {
   }
 
   render() {
-    return <div className="blog-container">{this.renderBlogItemDetails()}</div>
+    const {isLoading} = this.state
+    const {renderBlogItemDetails} = this
+    return (
+      <div className="blog-container">
+        {isLoading ? (
+          <div testid="loader">
+            <Loader type="TailSpin" color="#00BFFF" height={50} width={50} />
+          </div>
+        ) : (
+          renderBlogItemDetails()
+        )}
+      </div>
+    )
   }
 }
 
